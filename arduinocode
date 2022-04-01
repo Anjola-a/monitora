@@ -1,7 +1,12 @@
 //FSR imports
 #include <Wire.h>
 #include "BluetoothSerial.h"
+
 #define FORCE_SENSOR_PIN 38 // ESP32 pin GIOP36 (ADC0): the FSR and 10K pulldown are connected to A0
+#define FORCE_SENSOR_PIN2 35 // ESP32 pin GIOP36 (ADC0): the FSR and 10K pulldown are connected to A0
+#define FORCE_SENSOR_PIN3 37 // ESP32 pin GIOP36 (ADC0): the FSR and 10K pulldown are connected to A0
+
+//#define FORCE_SENSOR_PIN 38 // ESP32 pin GIOP36 (ADC0): the FSR and 10K pulldown are connected to A0
 
 //BNO055 imports
 #include <Adafruit_Sensor.h>
@@ -12,11 +17,13 @@
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 BluetoothSerial SerialBT;
-int filtered_reading;
+int readings[] = {0, 0, 0};
+int ranges[] = {0, 0, 0};
 long randNumber;
-int GRF_range;
 int counter = 0;
 int total = 0;
+int total3 = 0;
+int total2 = 0;
 int temp;
 int currentMillis = millis();
 int startMillis = millis();
@@ -60,8 +67,11 @@ void IMU_setup() {
 }
 
 void loop() {
+  //  initializing sensors
   imu::Vector<3> accel_value = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
   int analogReading = analogRead(FORCE_SENSOR_PIN);
+  int analogReading2 = analogRead(FORCE_SENSOR_PIN2);
+  int analogReading3 = analogRead(FORCE_SENSOR_PIN3);
 
   //filter for IMU
   cnt ++;
@@ -84,13 +94,13 @@ void loop() {
   Serial.print(y_accel_f);
   Serial.print("X accel: ");
   Serial.println(z_accel_f);
-  if (movement == false && (x_accel_f > 1.2 || y_accel_f > 1.8 )) {
+  if (movement == false && (z_accel_f > 1.3 || y_accel_f > 1.8 )) {
     stime = millis();
     movement = true;
     Serial.println("movement true first");
     Serial.println("FSR OFF");
   }
-  if (movement == true && (x_accel_f > 1.2 || y_accel_f > 1.8)) {
+  if (movement == true && (z_accel_f > 1.3 || y_accel_f > 1.8)) {
     crtime = millis();
     Serial.println("movement true second");
     Serial.println("FSR OFF");
@@ -106,53 +116,71 @@ void loop() {
   //  logic for moving average filer for FSR
   counter ++;
   total += analogReading;
+  total2 += analogReading2;
+  total3 += analogReading3;
   //a window greater than 2 slows down the
   //code and will not enough data points
   if (counter > 1) {
-    filtered_reading = total / 2;
+    readings[0] = total / 2;
+    readings[1] = total2 / 2;
+    readings[2] = total3 / 2;
     total = 0;
+    total2 = 0;
+    total3 = 0;
     counter = 0;
   }
-  if (filtered_reading < 10) {      // from 0 to 9
-    Serial.println(" -> no pressure");
-    GRF_range = 0;
-  }
-  else if  (filtered_reading < 200) { // from 10 to 199
-    Serial.println(" -> low");
-    GRF_range = 1;
-  }
-  else if (filtered_reading < 400) {// from 200 to 399
-    Serial.println(" -> low");
-    GRF_range = 2;
-  } else if (filtered_reading < 600) { // from 400 to 699
-    Serial.println(" -> medium");
-    GRF_range = 3;
-  }
-  else if (filtered_reading < 800) { // from 700 to 899
-    Serial.println(" -> medium");
-    GRF_range = 4;
-  }
-  else { // from 900 to 1023
-    Serial.println(" -> high");
-    GRF_range = 5;
-  }
 
+
+  for (int thisFSR = 0; thisFSR < 3; thisFSR++) {
+    if (readings[thisFSR] < 10) {      // from 0 to 9
+      ranges[thisFSR] = 0;
+    }
+    else if  (readings[thisFSR] < 200) { // from 10 to 199
+      ranges[thisFSR] = 1;
+    }
+    else if (readings[thisFSR] < 400) {// from 200 to 399
+      ranges[thisFSR] = 2;
+
+    } else if (readings[thisFSR] < 600) { // from 400 to 699
+      ranges[thisFSR] = 3;
+    }
+    else if (readings[thisFSR] < 800) { // from 700 to 899
+      ranges[thisFSR] = 4;
+    }
+    else { // from 900 to 1023
+      ranges[thisFSR] = 5;
+    }
+  }
+//  Serial.print("FSR1");
+//  Serial.println(ranges[0]);
+//  Serial.print("FSR2");
+//  Serial.println(ranges[1]);
+//  Serial.print("FSR3");
+//  Serial.println(ranges[2]);
+  
   if (walking == true) {
-    SerialBT.print(GRF_range);
+    SerialBT.print(ranges[0]);
     SerialBT.print(",");
-    SerialBT.println(filtered_reading);
+    SerialBT.print(ranges[1]);
+    SerialBT.print(",");
+    SerialBT.println(ranges[2]);
+    
+//    SerialBT.println(filtered_reading);
 
-    Serial.print(GRF_range);
+//    Serial.print("FSR1");
+    Serial.print(ranges[0]);
     Serial.print(",");
-    Serial.println(filtered_reading);
+    Serial.print(ranges[2]);
+    Serial.print(",");
+    Serial.println(ranges[1]);
   }
   currentMillis = millis();
   temp = currentMillis - startMillis;
-//  Serial.println(temp);
+  //  Serial.println(temp);
   //  if (temp > 10000){
   //    delay(10000);
   //    startMillis = millis();
   //  }
 
   delay(500);
-}
+  }
