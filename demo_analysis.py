@@ -37,23 +37,25 @@ def plot_data():
         FSRreading.append(int(dataArray[1]))
        
         
-        if(len(GFR_range) < 30):
-            GFR_range.append(int(dataArray[2]))
+        if(len(GFR_range) < 46):
+            GFR_range.append(int(dataArray[0]))
             gait_t.append(t)
         else:
-            GFR_range[0:29] = GFR_range[1:30]
-            GFR_range[29] = int(dataArray[2])
-            gait_t[0:29] = gait_t[1:30]
-            gait_t[29] = t
-            x_s += 0.5
-            x_end += 0.5
+            GFR_range[0:45] = GFR_range[1:46]
+            GFR_range[45] = int(dataArray[0])
+            gait_t[0:45] = gait_t[1:46]
+            gait_t[45] = t
+            # x_s += 0.31
+            # x_end += 0.27
+            x_s = t-13
+            x_end = t
             ax.set_xlim(x_s,x_end)
             
-		
+		# print(gait_t)
         lines.set_xdata(gait_t)
         lines.set_ydata(GFR_range)
         
-        # print(gait_t)
+        print(gait_t)
     
         ## gets wiped everyday
         f = open('daily_data.csv','a')
@@ -90,7 +92,7 @@ ax.set_title('GRF range Data');
 ax.set_xlabel('time')
 ax.set_ylabel('FSR range')
 ax.set_xlim(x_s,x_end)
-ax.set_ylim(0,6)
+ax.set_ylim(0,9)
 ax.grid(True)
 lines = ax.plot([],[])[0]
 
