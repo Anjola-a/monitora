@@ -5,10 +5,12 @@ import numpy as np
 import serial as sr
 import time
 from datetime import datetime
+
 root = tk.Tk()
 root.title('Real time Plot')
 root.configure(background= "light blue")
 root.geometry('700x500')  ## sets window size
+from tkinter import *
 
 #------global variables
 data = np.array([])
@@ -74,8 +76,10 @@ def plot_data():
     
 
 def plot_start():
-    global cond, ms
-    ms = time.time()
+    global cond, ms, cnt
+    if cnt == 0:
+        ms = time.time()
+        cnt = 1
     cond = True
     s.reset_input_buffer()
 
@@ -97,7 +101,7 @@ ax.grid(True)
 lines = ax.plot([],[])[0]
 
 canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea. want to display in root window
-canvas.get_tk_widget().place(x = 10,y=10, width = 500,height = 400)
+canvas.get_tk_widget().place(x = 122,y=65, width = 500,height = 400)
 canvas.draw()
 
 #----------create button---------
@@ -106,13 +110,27 @@ start = tk.Button(root, text = "Start", font = ('calbiri',12),command = lambda: 
 start.place(x = 100, y = 450 )
 
 root.update();
+
+def prevPage():
+    root.destroy()
+    import page1
+    # import demo_analysis
+    
 stop = tk.Button(root, text = "Stop", font = ('calbiri',12), command = lambda:plot_stop())
+back = tk.Button(root, text = "HomePage", font = ('calbiri',12), command = lambda:prevPage())
+back.place(x = start.winfo_x()+start.winfo_reqwidth() + 100, y = 450)
 stop.place(x = start.winfo_x()+start.winfo_reqwidth() + 20, y = 450)
 
 #----start serial port----
 s = sr.Serial('COM8',115200);
 s.reset_input_buffer()
 
+# --- creating/initializing all of our frames ---
+home = tk.Frame(root)
+exercise_one = tk.Frame(root)
+exercise_two = tk.Frame(root)
+result = tk.Frame(root)
+    
 root.after(1,plot_data)
 root.mainloop()
 
