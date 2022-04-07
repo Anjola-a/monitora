@@ -92,18 +92,19 @@ void loop() {
   Serial.print(x_accel_f);
   Serial.print("Y accel: ");
   Serial.print(y_accel_f);
-  Serial.print("X accel: ");
+  Serial.print("Z accel: ");
   Serial.println(z_accel_f);
-  if (movement == false && (z_accel_f > 1.3 || y_accel_f > 1.8 )) {
+//  if (movement == false && (z_accel_f > 3.0 || x_accel_f > 1.7 ||y_accel_f > 10.1 || y_accel_f < 8.9 )) {
+    if (movement == false && (x_accel_f > 1.1 || y_accel_f > 10.1 || y_accel_f < 8.9 || z_accel_f > 2.4)) {
     stime = millis();
     movement = true;
     Serial.println("movement true first");
-    Serial.println("FSR OFF");
+//    Serial.println("FSR OFF");
   }
-  if (movement == true && (z_accel_f > 1.3 || y_accel_f > 1.8)) {
+    if (movement == true && (x_accel_f > 1.1 || y_accel_f > 10.1 || y_accel_f < 8.9 || z_accel_f > 2.4)) {
     crtime = millis();
     Serial.println("movement true second");
-    Serial.println("FSR OFF");
+//    Serial.println("FSR OFF");
     if (crtime - stime > 5000) {
       walking = true;
       Serial.println("FSR ON");
@@ -113,7 +114,7 @@ void loop() {
     walking = false;
   }
 
-  //  logic for moving average filer for FSR
+  //  logic for moving average filer for FSR  
   counter ++;
   total += analogReading;
   total2 += analogReading2;
@@ -144,11 +145,21 @@ void loop() {
     } else if (readings[thisFSR] < 600) { // from 400 to 699
       ranges[thisFSR] = 3;
     }
-    else if (readings[thisFSR] < 800) { // from 700 to 899
+    else if (readings[thisFSR] < 800) { // from 700 to 799
       ranges[thisFSR] = 4;
     }
-    else { // from 900 to 1023
+    else if (readings[thisFSR] < 1000) { // from 700 to 799
       ranges[thisFSR] = 5;
+    }
+    else if (readings[thisFSR] < 1200) { // from 700 to 799
+      ranges[thisFSR] = 6;
+    }
+    else if (readings[thisFSR] < 1400) { // from 700 to 799
+      ranges[thisFSR] = 7;
+    }
+    else { // from 800 to 1023
+//      Serial.println(readings[thisFSR]);
+      ranges[thisFSR] = 8;
     }
   }
 //  Serial.print("FSR1");
@@ -161,9 +172,9 @@ void loop() {
   if (walking == true) {
     SerialBT.print(ranges[0]);
     SerialBT.print(",");
-    SerialBT.print(ranges[1]);
+    SerialBT.print(ranges[2]);
     SerialBT.print(",");
-    SerialBT.println(ranges[2]);
+    SerialBT.println(ranges[1]);
     
 //    SerialBT.println(filtered_reading);
 
@@ -182,5 +193,5 @@ void loop() {
   //    startMillis = millis();
   //  }
 
-  delay(500);
+  delay(300);
   }

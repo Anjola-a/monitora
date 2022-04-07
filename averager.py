@@ -122,9 +122,9 @@ def plot_average():
     plt.bar(br1, FSR1, color ='r', width = barWidth,
             edgecolor ='grey', label ='Heel')
     plt.bar(br2, FSR2, color ='g', width = barWidth,
-            edgecolor ='grey', label ='FSR2')
+            edgecolor ='grey', label ='MT1')
     plt.bar(br3, FSR3, color ='b', width = barWidth,
-            edgecolor ='grey', label ='FSR3')
+            edgecolor ='grey', label ='MT2')
     
     # Adding Xticks
     plt.xlabel('Day', fontweight ='bold', fontsize = 15)

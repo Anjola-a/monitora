@@ -81,14 +81,17 @@ def plot_data():
     root.after(1,plot_data)
     
 s = ""
+varr2 = 0
 def plot_start():
-    global cond, ms, cnt, s
-    if cnt == 0:
-        #----start serial port----
-        s = sr.Serial('COM8',115200);
-        s.reset_input_buffer()
+    global cond, ms, cnt, s,varr2
+    if cnt == 0:  
         ms = time.time()
         cnt = 1
+        if varr2 == 0:
+        #----start serial port----
+            s = sr.Serial('COM8',115200);
+            s.reset_input_buffer()
+            varr2 = 1
     cond = True
     s.reset_input_buffer()
 
@@ -100,19 +103,24 @@ def plot_stop():
     # ms = time.time()
 
 def exit_plot():
-    global cnt, FSRreading, GFR_range, cond, gait_t
+    global cnt, FSRreading, GFR_range, cond, gait_t,x_s, x_end
     cnt = 0
     FSRreading = []
     GFR_range = []
     gait_t = []
+    x_s = 0
+    x_end =15
+    ax.set_xlim(x_s,x_end)
     cond = False
+    comp_daily_average()
 
 img_avg = Image.open("average.png")
 result = ""
 def generate_plot():
+    ##left mt1
     global img_avg, result
     # print(" in plot herreee")
-    comp_daily_average()
+    # comp_daily_average()
     result = plot_average()
     img_avg = Image.open("average.png")
     img_avg = img_avg.resize((750, 400), Image.ANTIALIAS)
@@ -193,9 +201,9 @@ fig = Figure();
 ax = fig.add_subplot(111)
 
 #ax = plt.axes(xlim=(0,100),ylim=(0, 120)); #displaying only 100 samples
-ax.set_title('GRF range Data');
+ax.set_title('GRF range Data for heel');
 ax.set_xlabel('time')
-ax.set_ylabel('FSR range')
+ax.set_ylabel('FSR range for heel')
 ax.set_xlim(x_s,x_end)
 ax.set_ylim(0,9)
 ax.grid(True)
