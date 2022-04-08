@@ -32,10 +32,13 @@ ms = 0
 x_s = 0
 x_end = 15
 cnt = 0
+temp1 = 1
+c = 0
+r = 0
 # home page functions --------
 def plot_data():
     # print("here1")
-    global cond, data, ms,FSRreading,gait_t,GFR_range,cnt, x_s, x_end,s
+    global cond, data, ms,FSRreading,gait_t,GFR_range,cnt, x_s, x_end,s,temp1,c,r
     if (cond == True):
         
         a = s.readline()
@@ -48,17 +51,24 @@ def plot_data():
         print(dataArray)
         FSRreading.append(int(dataArray[1]))
        
+        if not a:
+           print("nothing to read")
         
-        if(len(GFR_range) < 46):
+        if(len(GFR_range) < 45 and t < 15):
+            
             GFR_range.append(int(dataArray[0]))
             gait_t.append(t)
         else:
-            GFR_range[0:45] = GFR_range[1:46]
-            GFR_range[45] = int(dataArray[0])
-            gait_t[0:45] = gait_t[1:46]
-            gait_t[45] = t
-            x_s = t-13
-            x_end = t
+            if temp1 == 1:
+                c = len(GFR_range)
+                r = gait_t[0]
+                temp1 = 2
+            GFR_range[0:c-1] = GFR_range[1:c]
+            GFR_range[c-1] = int(dataArray[0])
+            gait_t[0:c-1] = gait_t[1:c]
+            gait_t[c-1] = t
+            x_s = t-13+r
+            x_end = t+0.5
             ax.set_xlim(x_s,x_end)
             
 		# print(gait_t)
@@ -89,7 +99,7 @@ def plot_start():
         cnt = 1
         if varr2 == 0:
         #----start serial port----
-            s = sr.Serial('COM8',115200);
+            s = sr.Serial('COM3',115200);
             s.reset_input_buffer()
             varr2 = 1
     cond = True
@@ -103,10 +113,11 @@ def plot_stop():
     # ms = time.time()
 
 def exit_plot():
-    global cnt, FSRreading, GFR_range, cond, gait_t,x_s, x_end
+    global cnt, FSRreading, GFR_range, cond, gait_t,x_s, x_end,temp1
     cnt = 0
     FSRreading = []
     GFR_range = []
+    temp1 = 1
     gait_t = []
     x_s = 0
     x_end =15
@@ -205,7 +216,7 @@ ax.set_title('GRF range Data for heel');
 ax.set_xlabel('time')
 ax.set_ylabel('FSR range for heel')
 ax.set_xlim(x_s,x_end)
-ax.set_ylim(0,9)
+ax.set_ylim(0,8.3)
 ax.grid(True)
 lines = ax.plot([],[])[0]
 
