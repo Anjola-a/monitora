@@ -45,7 +45,7 @@ def plot_data():
         arduinoString = a.decode()
         dataArray = arduinoString.split(',')
         size = len(dataArray[2])
-        dataArray[2] = dataArray[2][:size - 2]
+        dataArray[2] = dataArray[2][:size - 2] ## removing new line character
         ct = time.time()
         t = (ct-ms)
         print(dataArray)
@@ -179,8 +179,6 @@ btn_avg = Button(home, image=img_btn_avg
 , borderwidth=0, highlightthickness=0,
             command=lambda: [set_home(), generate_plot()], relief="flat")
 btn_avg.place(x = 796, y = 388, width = 161, height = 93)
-
-## fix issue with old plot
 
 
 # -------- setting up weekly average page ------------

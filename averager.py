@@ -28,14 +28,12 @@ def comp_daily_average():
             cnt += 1
             size = len(dataArray[3])
             dataArray[3] = dataArray[3][:size - 1]
-            # prfloat(dataArray)
             total1 += float(dataArray[1])
             total2 += float(dataArray[2])
             total3 += float(dataArray[3])
         day1 = float(total1/cnt)
         day2 = float(total2/cnt)
         day3 = float(total3/cnt)
-        # daily_average = (total1/cnt)
         f_average = open('daily_average.csv','a')
         f_average.write(str(day) + "," + str(day1) + "\n")
         f_average.close()
@@ -133,7 +131,6 @@ def plot_average():
     plt.legend( loc='upper left')
     
     plt.savefig('average.png')
-    # plt.show()
     plt.close()
     return(avg_text)
 
